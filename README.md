@@ -1,4 +1,4 @@
-# Expense_tracker_m3_documentation
+#Expense_tracker_m3_documentation
 
 A comprehensive RESTful API for tracking personal expenses and managing financial transactions built with Flask.
 
@@ -230,8 +230,6 @@ Authenticates a user and returns JWT access and refresh tokens.
 }
 ```
 
-**Rate limiting:** Maximum 5 failed attempts before cooldown period
-
 #### Refresh token
 Generates a new access token using a valid refresh token when the access token expires.
 
@@ -290,8 +288,6 @@ Initiates the password reset process by sending a reset link to the user's email
   "message": "Check your gmail inbox, you will receive a password reset link shortly."
 }
 ```
-
-**Rate limiting:** One request every 10 minutes per email address
 
 #### Confirm password reset
 Sets a new password using the token received in the password reset email.
@@ -503,8 +499,6 @@ Authorization: Bearer {access_token}
   "message": "Enter the otps sent to your current and new email addresses"
 }
 ```
-
-**Rate limiting:** One request every 5 minutes per user
 
 #### Confirm email change (self-initiated)
 Completes the self-initiated email change process by verifying OTPs from both current and new email addresses.
