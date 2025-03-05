@@ -1,5 +1,3 @@
-#Expense_tracker_m3_documentation
-
 A comprehensive RESTful API for tracking personal expenses and managing financial transactions built with Flask.
 
 ## Table of Contents
