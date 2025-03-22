@@ -9,10 +9,13 @@
 - [Inter-wallet Transactions](#inter-wallet-transactions)
 - [Budgets](#budgets)
 - [Recurring Transactions](#recurring-transactions)
+- [Reports and Analytics](#reports-and-analytics)
 
 ## Introduction
 
 The Flask Expense Tracker API is a robust financial management system designed to help users track their income and expenses. It provides a complete backend solution with secure authentication, comprehensive transaction management, and advanced reporting features.
+
+---
 
 ## Authentication and User Management
 
@@ -22,44 +25,86 @@ The Authentication and User Management module provides comprehensive functionali
 
 #### 1. User Roles
 - **Admin**: Full access to manage all users, their financial data, and system resources. Can create additional admin accounts.
-- **User**: Manage their own financial data (e.g., wallets, transactions, categories). View-only access to their child user’s assets (e.g., via child_id parameter in API requests).
-- **Child User**: Restricted users created by parent users, with limited permissions to manage only their own data
+- **User**: Manage their own financial data (e.g., wallets, transactions, categories). View-only access to their child user’s assets (e.g., via `child_id` parameter in API requests).
+- **Child User**: Restricted users created by parent users, with limited permissions to manage only their own data.
 
 #### 2. JWT Authentication
 - Secure token-based authentication using JWT (JSON Web Tokens)
 - Includes access tokens (short-lived) and refresh tokens (longer-lived), with a role field encoded in the token claims
-- Tokens must be included in the Authorization header as Bearer <token> for protected endpoints.
+- Tokens must be included in the Authorization header as `Bearer <token>` for protected endpoints.
 
 #### 3. User Registration and Verification
-**Signup**
-- Users register itself by providing its details(email, username, password, name) and account verification link will be sent on his email for account verification.
-- Once verification is done the user account will be created and a default wallet is created upon successful registration.
+*Signup*
+- Users register by providing their details (email, username, password, name) and an account verification link will be sent to their email for account verification.
+- Once verification is done, the user account will be created, and a default wallet is created upon successful registration.
   
-**Login**
-- User can login using username or email and password
+*Login*
+- Users can log in using username or email and password.
 - Returns access token (JWT) and refresh token upon successful login.
 
 #### 4. Profile Management
 - User profile updates (username, name, gender, date of birth)
-- User can change his own email with verification through OTP received on current and new email both.
-- If admin will change email then a verification link will be sent to new email and after verification email will be updated.
+- Users can change their own email with verification through OTP received on both current and new email.
+- If an admin changes an email, a verification link will be sent to the new email, and after verification, the email will be updated.
 - Password updates with current password verification.
 
 #### 5. Parent-Child Relationships
-- Parents can create and monitor child user accounts and his finacial data.
-- Child also have to veriy his account for successful account creation using the link send on his email.
-- Child accounts are linked through a dedicated parent-child relationship model
-- Each parent can have only one child user
+- Parents can create and monitor child user accounts and their financial data.
+- Children must verify their account for successful creation using the link sent to their email.
+- Child accounts are linked through a dedicated parent-child relationship model.
+- Each parent can have only one child user.
 
 #### 6. Account Security
 - Email verification for new accounts and email changes
 - Password reset functionality with secure tokens
-- Account deletion with password validation.(password not required if admin is deleting any user account.)
+- Account deletion with password validation (password not required if an admin is deleting any user account).
 
 ### API Endpoints
 
+#### List All Users (Admin Only)
+**Endpoint:** `GET /api/users`  
+- Retrieve a paginated list of all users (accessible only by admins)
+
+**Query Parameters:**
+- `page`: Page number for pagination (default: 1)
+- `per_page`: Number of items per page (default: 10)
+
+**Response (200 OK):**
+```json
+{
+  "data": [
+    {
+      "id": "01234567-89ab-cdef-0123-456789abcdef",
+      "username": "johndoe",
+      "email": "john@example.com",
+      "name": "John Doe",
+      "role": "USER",
+      "is_verified": true,
+      "is_deleted": false,
+      "created_at": "2023-01-01T12:00:00Z",
+      "updated_at": "2023-01-01T12:00:00Z"
+    },
+    {
+      "id": "98765432-fedc-ba98-7654-321098765432",
+      "username": "janedoe",
+      "email": "jane@example.com",
+      "name": "Jane Doe",
+      "role": "ADMIN",
+      "is_verified": true,
+      "is_deleted": false,
+      "created_at": "2023-01-02T10:00:00Z",
+      "updated_at": "2023-01-02T10:00:00Z"
+    }
+  ],
+  "total_items": 50,
+  "current_page": 1,
+  "total_pages": 5,
+  "per_page": 10
+}
+```
+
 #### User Registration
-**Endpoint:** `POST /api/auth/sign-up`
+**Endpoint:** `POST /api/auth/sign-up`  
 - Register a new user account and send verification email
 
 **Request:**
@@ -83,7 +128,7 @@ The Authentication and User Management module provides comprehensive functionali
 ```
 
 #### Email Verification
-**Endpoint:** `GET /api/auth/verify-user/{token}`
+**Endpoint:** `GET /api/auth/verify-user/{token}`  
 - Verify user's email using the token sent via email
 
 **Response (200 OK):**
@@ -94,7 +139,7 @@ The Authentication and User Management module provides comprehensive functionali
 ```
 
 #### User Login
-**Endpoint:** `POST /api/auth/login`
+**Endpoint:** `POST /api/auth/login`  
 - Authenticate user and generate access and refresh tokens
 
 **Request:**
@@ -114,7 +159,7 @@ The Authentication and User Management module provides comprehensive functionali
 ```
 
 #### Token Refresh
-**Endpoint:** `POST /api/auth/refresh-token`
+**Endpoint:** `POST /api/auth/refresh-token`  
 - Generate a new access token using a valid refresh token
 
 **Request:**
@@ -132,7 +177,7 @@ The Authentication and User Management module provides comprehensive functionali
 ```
 
 #### User Logout
-**Endpoint:** `POST /api/auth/logout`
+**Endpoint:** `POST /api/auth/logout`  
 - Invalidate the current access token
 
 **Response (200 OK):**
@@ -143,7 +188,7 @@ The Authentication and User Management module provides comprehensive functionali
 ```
 
 #### Get User Profile
-**Endpoint:** `GET /api/users/{id}`
+**Endpoint:** `GET /api/users/{id}`  
 - Retrieve user profile information
 
 **Response (200 OK):**
@@ -164,7 +209,7 @@ The Authentication and User Management module provides comprehensive functionali
 ```
 
 #### Update User Profile
-**Endpoint:** `PATCH /api/users/{id}`
+**Endpoint:** `PATCH /api/users/{id}`  
 - Update user profile information
 
 **Request:**
@@ -195,7 +240,7 @@ The Authentication and User Management module provides comprehensive functionali
 ```
 
 #### Update Password
-**Endpoint:** `POST /api/users/{id}/update-password`
+**Endpoint:** `POST /api/users/{id}/update-password`  
 - Update user's password
 
 **Request:**
@@ -215,7 +260,7 @@ The Authentication and User Management module provides comprehensive functionali
 ```
 
 #### Request Email Change
-**Endpoint:** `POST /api/users/{id}/update-email`
+**Endpoint:** `POST /api/users/{id}/update-email`  
 - Initiate email change process by sending verification OTPs to both current and new email addresses
 
 **Request:**
@@ -233,7 +278,7 @@ The Authentication and User Management module provides comprehensive functionali
 ```
 
 #### Confirm Email Change
-**Endpoint:** `POST /api/users/{id}/update-email/confirm`
+**Endpoint:** `POST /api/users/{id}/update-email/confirm`  
 - Confirm email change by verifying OTPs sent to both email addresses
 
 **Request:**
@@ -252,7 +297,7 @@ The Authentication and User Management module provides comprehensive functionali
 ```
 
 #### Delete User Account
-**Endpoint:** `DELETE /api/users/{id}`
+**Endpoint:** `DELETE /api/users/{id}`  
 - Soft delete user account and related resources
 
 **Request:**
@@ -265,7 +310,7 @@ The Authentication and User Management module provides comprehensive functionali
 **Response (204 No Content)**
 
 #### Request Password Reset
-**Endpoint:** `POST /api/auth/reset-password`
+**Endpoint:** `POST /api/auth/reset-password`  
 - Request a password reset link for a registered email
 
 **Request:**
@@ -283,7 +328,7 @@ The Authentication and User Management module provides comprehensive functionali
 ```
 
 #### Reset Password with Token
-**Endpoint:** `POST /api/auth/reset-password-confirm/{token}`
+**Endpoint:** `POST /api/auth/reset-password-confirm/{token}`  
 - Reset password using token received via email
 
 **Request:**
@@ -302,7 +347,7 @@ The Authentication and User Management module provides comprehensive functionali
 ```
 
 #### Create Child User
-**Endpoint:** `POST /api/users/{id}/child`
+**Endpoint:** `POST /api/users/{id}/child`  
 - Create a new child user linked to parent account
 
 **Request:**
@@ -325,7 +370,7 @@ The Authentication and User Management module provides comprehensive functionali
 ```
 
 #### Get Child User
-**Endpoint:** `GET /api/users/{id}/child`
+**Endpoint:** `GET /api/users/{id}/child`  
 - Retrieve child user linked to parent account
 
 **Response (200 OK):**
@@ -346,7 +391,7 @@ The Authentication and User Management module provides comprehensive functionali
 ```
 
 #### Create Admin User (Admin Only)
-**Endpoint:** `POST /api/admin/create`
+**Endpoint:** `POST /api/admin/create`  
 - Create a new admin user (accessible only by admins)
 
 **Request:**
@@ -368,12 +413,13 @@ The Authentication and User Management module provides comprehensive functionali
 }
 ```
 
+---
+
 ## Categories
 
 Categories provide a classification system for organizing financial transactions. The module supports both system-defined default categories and user-created custom categories to enable meaningful organization and reporting.
 
 ### Features and Constraints
-
 - **Predefined System Categories**: Default categories (Food, Transport, Utilities, etc.) available to all users.
 - **Custom User Categories**: Users can create personalized categories to better organize their financial data.
 - **Naming Rules**: Category names must be unique per user (case-insensitive) and cannot duplicate predefined category names.
@@ -384,13 +430,14 @@ Categories provide a classification system for organizing financial transactions
 ### API Endpoints
 
 #### List Categories
-**Endpoint:** `GET /api/categories`
+**Endpoint:** `GET /api/categories`  
 - Retrieve paginated list of available categories
 
 **Query Parameters:**
 - `page`: Page number for pagination (default: 1)
 - `per_page`: Number of items per page (default: 10)
 - `child_id`: UUID of child user to view their categories (for parent users)
+- `user_id`: Target user ID for admin requests
 
 **Response (200 OK):**
 ```json
@@ -423,7 +470,7 @@ Categories provide a classification system for organizing financial transactions
 ```
 
 #### Create Category
-**Endpoint:** `POST /api/categories`
+**Endpoint:** `POST /api/categories`  
 - Create a new custom category
 
 **Request:**
@@ -448,7 +495,7 @@ Categories provide a classification system for organizing financial transactions
 ```
 
 #### Get Category
-**Endpoint:** `GET /api/categories/{id}`
+**Endpoint:** `GET /api/categories/{id}`  
 - Retrieve a specific category's details
 
 **Response (200 OK):**
@@ -465,7 +512,7 @@ Categories provide a classification system for organizing financial transactions
 ```
 
 #### Update Category
-**Endpoint:** `PATCH /api/categories/{id}`
+**Endpoint:** `PATCH /api/categories/{id}`  
 - Update a category's name
 
 **Request:**
@@ -489,19 +536,20 @@ Categories provide a classification system for organizing financial transactions
 ```
 
 #### Delete Category
-**Endpoint:** `DELETE /api/categories/{id}`
+**Endpoint:** `DELETE /api/categories/{id}`  
 - Delete a category if it has no associated transactions
 
 **Response (204 No Content)**
+
+---
 
 ## Wallets
 
 Users can manage their wallets, which store financial information such as balances, allowing users to organize their finances across multiple accounts or purposes.
 
 ### Features and Constraints
-
 - **Wallet Management**: Users can create, retrieve, update, and delete their wallets. Admins can manage wallets for any user.
-- **Balance Control**: Wallets maintain balance integrity through transaction validation. Balance is read-only and only modified through transactions. Initial balance of the wallet will always zero.
+- **Balance Control**: Wallets maintain balance integrity through transaction validation. Balance is read-only and only modified through transactions. Initial balance of the wallet will always be zero.
 - **Naming Rules**: Wallet names must be unique per user (case-insensitive).
 - **Deletion Restrictions**: Wallets can only be deleted if they have zero balance and no associated transactions.
 - **Access Control**: Users can access only their own wallets, parents can view their child's wallets, and admins can manage all wallets.
@@ -510,13 +558,14 @@ Users can manage their wallets, which store financial information such as balanc
 ### API Endpoints
 
 #### List Wallets
-**Endpoint:** `GET /api/wallets`
+**Endpoint:** `GET /api/wallets`  
 - Retrieve paginated list of available wallets
 
 **Query Parameters:**
 - `page`: Page number for pagination (default: 1)
 - `per_page`: Number of items per page (default: 10)
 - `child_id`: UUID of child user to view their wallets (for parent users)
+- `user_id`: Target user ID for admin requests
 
 **Response (200 OK):**
 ```json
@@ -549,7 +598,7 @@ Users can manage their wallets, which store financial information such as balanc
 ```
 
 #### Create Wallet
-**Endpoint:** `POST /api/wallets`
+**Endpoint:** `POST /api/wallets`  
 - Create a new wallet
 
 **Request:**
@@ -574,7 +623,7 @@ Users can manage their wallets, which store financial information such as balanc
 ```
 
 #### Get Wallet
-**Endpoint:** `GET /api/wallets/{id}`
+**Endpoint:** `GET /api/wallets/{id}`  
 - Retrieve a specific wallet's details
 
 **Response (200 OK):**
@@ -591,7 +640,7 @@ Users can manage their wallets, which store financial information such as balanc
 ```
 
 #### Update Wallet
-**Endpoint:** `PATCH /api/wallets/{id}`
+**Endpoint:** `PATCH /api/wallets/{id}`  
 - Update a wallet's name
 
 **Request:**
@@ -615,35 +664,37 @@ Users can manage their wallets, which store financial information such as balanc
 ```
 
 #### Delete Wallet
-**Endpoint:** `DELETE /api/wallets/{id}`
+**Endpoint:** `DELETE /api/wallets/{id}`  
 - Delete a wallet (requires zero balance and no associated transactions)
 
 **Response (204 No Content)**
+
+---
 
 ## Transactions
 
 Transactions represent financial activities (income and expenses) within the user's wallets. All transactions are soft-deleted to maintain financial records and support accurate reporting.
 
 ### Features and Constraints
-
 - **Transaction Types**: Supports two transaction types - CREDIT (income) and DEBIT (expense).
 - **Wallet Integration**: Each transaction is linked to a specific wallet and updates the wallet's balance automatically.
 - **Category Classification**: Every transaction must be associated with a category for better organization and reporting.
 - **Date Tracking**: Transactions include timestamps for chronological tracking and time-based reporting.
 - **Access Control**: Users can only access their own transactions, while parents can view their child's transactions and admins can access any user's transactions.
 - **Budget Impact**: Expense transactions automatically affect any matching budget's spent amount.
-- **Validation Rules**: The amount must be between 0 and 99999999.99.<br>The category used in the transaction must belong to the user or be global and not be deleted.<br>The wallet used in the transaction must belong to the user and not be deleted.
+- **Validation Rules**: The amount must be between 0 and 99999999.99. The category used in the transaction must belong to the user or be global and not be deleted. The wallet used in the transaction must belong to the user and not be deleted.
 
 ### API Endpoints
 
 #### List Transactions
-**Endpoint:** `GET /api/transactions`
+**Endpoint:** `GET /api/transactions`  
 - Retrieve paginated list of transactions with filtering options
 
 **Query Parameters:**
 - `page`: Page number for pagination (default: 1)
 - `per_page`: Number of items per page (default: 10)
 - `child_id`: UUID of child user to view their transactions (for parent users)
+- `user_id`: Target user ID for admin requests
 - `wallet_id`: Filter by specific wallet
 - `category_id`: Filter by specific category
 - `type`: Filter by transaction type (CREDIT or DEBIT)
@@ -701,7 +752,7 @@ Transactions represent financial activities (income and expenses) within the use
 ```
 
 #### Create Transaction
-**Endpoint:** `POST /api/transactions`
+**Endpoint:** `POST /api/transactions`  
 - Create a new transaction
 
 **Request:**
@@ -741,7 +792,7 @@ Transactions represent financial activities (income and expenses) within the use
 ```
 
 #### Get Transaction
-**Endpoint:** `GET /api/transactions/{id}`
+**Endpoint:** `GET /api/transactions/{id}`  
 - Retrieve details of a specific transaction
 
 **Response (200 OK):**
@@ -768,7 +819,7 @@ Transactions represent financial activities (income and expenses) within the use
 ```
 
 #### Update Transaction
-**Endpoint:** `PATCH /api/transactions/{id}`
+**Endpoint:** `PATCH /api/transactions/{id}`  
 - Update a transaction
 
 **Request:**
@@ -806,17 +857,18 @@ Transactions represent financial activities (income and expenses) within the use
 ```
 
 #### Delete Transaction
-**Endpoint:** `DELETE /api/transactions/{id}`
+**Endpoint:** `DELETE /api/transactions/{id}`  
 - Soft delete a transaction
 
 **Response (204 No Content)**
+
+---
 
 ## Budgets
 
 Budgets provide a monthly financial planning tool for tracking and controlling expenses by category. The system supports budget creation, monitoring, and automated notifications when spending approaches or exceeds defined limits.
 
 ### Features and Constraints
-
 - **Category-Based Budgeting**: Each budget is tied to a specific expense category for targeted monitoring.
 - **Monthly Planning**: Budgets are created for specific month and year combinations, enabling time-based financial planning.
 - **Spending Tracking**: The system automatically tracks spending against budgets when transactions are created, updated, or deleted.
@@ -828,13 +880,14 @@ Budgets provide a monthly financial planning tool for tracking and controlling e
 ### API Endpoints
 
 #### List Budgets
-**Endpoint:** `GET /api/budgets`
+**Endpoint:** `GET /api/budgets`  
 - Retrieve paginated list of budgets with filtering options
 
 **Query Parameters:**
 - `page`: Page number for pagination (default: 1)
 - `per_page`: Number of items per page (default: 10)
 - `child_id`: UUID of child user to view their budgets (for parent users)
+- `user_id`: Target user ID for admin requests
 - `category_id`: Filter by specific category
 - `month`: Filter by month (1-12)
 - `year`: Filter by year
@@ -882,7 +935,7 @@ Budgets provide a monthly financial planning tool for tracking and controlling e
 ```
 
 #### Create Budget
-**Endpoint:** `POST /api/budgets`
+**Endpoint:** `POST /api/budgets`  
 - Create a new budget for a specific category, month, and year
 
 **Request:**
@@ -916,7 +969,7 @@ Budgets provide a monthly financial planning tool for tracking and controlling e
 ```
 
 #### Get Budget
-**Endpoint:** `GET /api/budgets/{id}`
+**Endpoint:** `GET /api/budgets/{id}`  
 - Retrieve details of a specific budget
 
 **Response (200 OK):**
@@ -939,7 +992,7 @@ Budgets provide a monthly financial planning tool for tracking and controlling e
 ```
 
 #### Update Budget
-**Endpoint:** `PATCH /api/budgets/{id}`
+**Endpoint:** `PATCH /api/budgets/{id}`  
 - Update a budget's amount or category
 
 **Request:**
@@ -970,36 +1023,38 @@ Budgets provide a monthly financial planning tool for tracking and controlling e
 ```
 
 #### Delete Budget
-**Endpoint:** `DELETE /api/budgets/{id}`
+**Endpoint:** `DELETE /api/budgets/{id}`  
 - Soft delete a budget
 
 **Response (204 No Content)**
+
+---
 
 ## Recurring Transactions
 
 Recurring Transactions automate regular financial activities by scheduling transactions to occur at defined intervals. They allow users to set up recurring payments or income sources that are processed automatically on scheduled dates.
 
 ### Features and Constraints
-
 - **Automated Processing**: System automatically creates regular transactions based on user-defined schedules.
 - **Frequency Options**: Supports daily, weekly, monthly, and yearly recurring transactions.
 - **Time Range Control**: Users can set both start and optional end dates for recurring transactions.
 - **Wallet Integration**: All recurring transactions are linked to specific wallets and maintain balance integrity.
 - **Category Classification**: Each recurring transaction must be associated with a category for better organization.
 - **Email Notifications**: Users receive email notifications when recurring transactions are processed.
-- **Validation Rules**: The system prevents creating recurring transactions with invalid dates, insufficient wallet balance, or invalid category/wallet combinations.<br>The wallet used in the transaction must belong to the user and not be deleted.<br>The category used in the transaction must belong to the user or be global and not be deleted.
+- **Validation Rules**: The system prevents creating recurring transactions with invalid dates, insufficient wallet balance, or invalid category/wallet combinations. The wallet used in the transaction must belong to the user and not be deleted. The category used in the transaction must belong to the user or be global and not be deleted.
 - **Access Control**: Users can only access their own recurring transactions, while parents can view their child's transactions.
 
 ### API Endpoints
 
 #### List Recurring Transactions
-**Endpoint:** `GET /api/recurring-transactions`
+**Endpoint:** `GET /api/recurring-transactions`  
 - Retrieve paginated list of recurring transactions with filtering options
 
 **Query Parameters:**
 - `page`: Page number for pagination (default: 1)
 - `per_page`: Number of items per page (default: 10)
 - `child_id`: UUID of child user to view their recurring transactions (for parent users)
+- `user_id`: Target user ID for admin requests
 - `wallet_id`: Filter by specific wallet
 - `category_id`: Filter by specific category
 - `type`: Filter by transaction type (CREDIT or DEBIT)
@@ -1064,7 +1119,7 @@ Recurring Transactions automate regular financial activities by scheduling trans
 ```
 
 #### Create Recurring Transaction
-**Endpoint:** `POST /api/recurring-transactions`
+**Endpoint:** `POST /api/recurring-transactions`  
 - Create a new recurring transaction
 
 **Request:**
@@ -1110,7 +1165,7 @@ Recurring Transactions automate regular financial activities by scheduling trans
 ```
 
 #### Get Recurring Transaction
-**Endpoint:** `GET /api/recurring-transactions/{id}`
+**Endpoint:** `GET /api/recurring-transactions/{id}`  
 - Retrieve details of a specific recurring transaction
 
 **Response (200 OK):**
@@ -1141,7 +1196,7 @@ Recurring Transactions automate regular financial activities by scheduling trans
 ```
 
 #### Update Recurring Transaction
-**Endpoint:** `PATCH /api/recurring-transactions/{id}`
+**Endpoint:** `PATCH /api/recurring-transactions/{id}`  
 - Update a recurring transaction
 
 **Request:**
@@ -1182,17 +1237,18 @@ Recurring Transactions automate regular financial activities by scheduling trans
 ```
 
 #### Delete Recurring Transaction
-**Endpoint:** `DELETE /api/recurring-transactions/{id}`
+**Endpoint:** `DELETE /api/recurring-transactions/{id}`  
 - Soft delete a recurring transaction
 
 **Response (204 No Content)**
+
+---
 
 ## Inter-wallet Transactions
 
 Inter-wallet Transactions enable users to transfer funds between their own wallets, providing flexibility in financial management and organization. This module maintains the integrity of wallet balances while creating a clear record of fund movements.
 
 ### Features and Constraints
-
 - **Wallet-to-Wallet Transfers**: Users can move funds between any of their personal wallets.
 - **Balance Validation**: System prevents transfers when source wallet has insufficient funds.
 - **Distinct Wallet Requirement**: Source and destination must be different wallets.
@@ -1204,13 +1260,14 @@ Inter-wallet Transactions enable users to transfer funds between their own walle
 ### API Endpoints
 
 #### List Inter-wallet Transactions
-**Endpoint:** `GET /api/interwallet-transactions`
+**Endpoint:** `GET /api/interwallet-transactions`  
 - Retrieve paginated list of transfers between wallets
 
 **Query Parameters:**
 - `page`: Page number for pagination (default: 1)
 - `per_page`: Number of items per page (default: 10)
 - `child_id`: UUID of child user to view their transfers (for parent users)
+- `user_id`: Target user ID for admin requests
 - `from_date`: Filter transfers from this date (format: YYYY-MM-DD)
 - `to_date`: Filter transfers to this date (format: YYYY-MM-DD)
 
@@ -1245,7 +1302,7 @@ Inter-wallet Transactions enable users to transfer funds between their own walle
 ```
 
 #### Create Inter-wallet Transfer
-**Endpoint:** `POST /api/interwallet-transactions`
+**Endpoint:** `POST /api/interwallet-transactions`  
 - Create a transfer between wallets
 
 **Request:**
@@ -1282,7 +1339,7 @@ Inter-wallet Transactions enable users to transfer funds between their own walle
 ```
 
 #### Get Inter-wallet Transfer
-**Endpoint:** `GET /api/interwallet-transactions/{id}`
+**Endpoint:** `GET /api/interwallet-transactions/{id}`  
 - Retrieve details of a specific transfer
 
 **Response (200 OK):**
@@ -1308,7 +1365,7 @@ Inter-wallet Transactions enable users to transfer funds between their own walle
 ```
 
 #### Update Inter-wallet Transfer
-**Endpoint:** `PATCH /api/interwallet-transactions/{id}`
+**Endpoint:** `PATCH /api/interwallet-transactions/{id}`  
 - Update a transfer between wallets
 
 **Request:**
@@ -1345,17 +1402,18 @@ Inter-wallet Transactions enable users to transfer funds between their own walle
 ```
 
 #### Delete Inter-wallet Transfer
-**Endpoint:** `DELETE /api/interwallet-transactions/{id}`
+**Endpoint:** `DELETE /api/interwallet-transactions/{id}`  
 - Soft delete a transfer between wallets
 
 **Response (204 No Content)**
+
+---
 
 ## Reports and Analytics
 
 The Reports and Analytics module provides comprehensive financial insights by aggregating transaction data into meaningful summaries, trends, and exportable formats. It helps users track their spending patterns and make informed financial decisions.
 
 ### Features and Constraints
-
 - **Transaction Summary Reports**: Detailed overview of financial activities including totals by category and wallet.
 - **Spending Trends Analysis**: Category-based spending breakdowns with percentage calculations and visualizations.
 - **Data Export Options**: Export transaction history in both PDF and CSV formats for offline analysis.
@@ -1367,7 +1425,7 @@ The Reports and Analytics module provides comprehensive financial insights by ag
 ### API Endpoints
 
 #### Transaction Summary Report
-**Endpoint:** `GET /api/transactions/summary-report`
+**Endpoint:** `GET /api/transactions/summary-report`  
 - Generate a comprehensive summary report of transactions with date range filtering
 
 **Query Parameters:**
@@ -1418,7 +1476,7 @@ The Reports and Analytics module provides comprehensive financial insights by ag
 ```
 
 #### Spending Trends
-**Endpoint:** `GET /api/transactions/spending-trends`
+**Endpoint:** `GET /api/transactions/spending-trends`  
 - Generate category-based spending trends with percentage breakdowns
 
 **Query Parameters:**
@@ -1467,7 +1525,7 @@ The Reports and Analytics module provides comprehensive financial insights by ag
 ```
 
 #### Export Transaction History
-**Endpoint:** `GET /api/transactions/history/export`
+**Endpoint:** `GET /api/transactions/history/export`  
 - Generate and email a detailed transaction history report in PDF or CSV format
 
 **Query Parameters:**
@@ -1487,3 +1545,8 @@ The Reports and Analytics module provides comprehensive financial insights by ag
 #### Utility Scripts
 - Terminal script which creates an admin user if none exists.
 - Terminal script which creates missing global categories (e.g., Salary, Food) if not present.
+
+### Background Tasks (Cron Jobs)
+- Permanently removes soft-deleted categories, wallets, and users after a certain period via a scheduled task.
+
+---
