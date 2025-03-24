@@ -123,8 +123,7 @@ The Authentication and User Management module provides comprehensive functionali
 **Response (200 OK):**
 ```json
 {
-  "message": "User registration request accepted. Please check your email to verify your account.",
-  "token": "verification_token_string"
+  "message": "User registration request accepted. Please check your email to verify your account."
 }
 ```
 
